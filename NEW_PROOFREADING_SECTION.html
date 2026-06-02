@@ -1,0 +1,108 @@
+    <!-- ── 교열 (세션 기반) ─────────────────────────────────────── -->
+    <div class="panel panel-work" id="panel-proofreading">
+      <div class="panel-header">
+        <div class="ph-info">
+          <span class="ph-title">교열</span>
+          <span class="ph-engine">EXAONE 3.0 · 세션 기반 누적 교열 · 일관성 자동 체크</span>
+        </div>
+        <div class="ph-actions">
+          <button class="btn-icon" onclick="resetProofSession()" title="세션 초기화"><i class="ti ti-refresh"></i></button>
+        </div>
+      </div>
+
+      <div class="panel-body">
+
+        <!-- 세션 상태 표시 -->
+        <div id="session-status" style="display:none;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:16px;margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <div style="font-size:13px;font-weight:600;color:var(--text)">
+              <i class="ti ti-progress"></i> <span id="session-progress-text">청크 진행 중</span>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;font-size:12px;margin-top:12px">
+            <div style="text-align:center">
+              <div style="color:var(--text2);font-size:10px">인물</div>
+              <div style="color:#7eb8f7;font-weight:600;font-size:14px" id="stat-characters">0</div>
+            </div>
+            <div style="text-align:center">
+              <div style="color:var(--text2);font-size:10px">장소</div>
+              <div style="color:#63e6be;font-weight:600;font-size:14px" id="stat-places">0</div>
+            </div>
+            <div style="text-align:center">
+              <div style="color:var(--text2);font-size:10px">용어</div>
+              <div style="color:#a9e34b;font-weight:600;font-size:14px" id="stat-terms">0</div>
+            </div>
+            <div style="text-align:center">
+              <div style="color:var(--text2);font-size:10px">모순</div>
+              <div style="color:#ff6b6b;font-weight:600;font-size:14px" id="stat-conflicts">0</div>
+            </div>
+          </div>
+
+          <div style="margin-top:12px;display:flex;gap:8px">
+            <button class="btn btn-sec" onclick="showAccumulatedWorldBible()" style="font-size:11px;padding:6px 12px">
+              <i class="ti ti-books"></i>누적 설정집 보기
+            </button>
+            <button class="btn btn-sec" onclick="showConflictsList()" style="font-size:11px;padding:6px 12px" id="btn-show-conflicts" disabled>
+              <i class="ti ti-alert-triangle"></i>모순 보기
+            </button>
+          </div>
+        </div>
+
+        <!-- 청크 입력 -->
+        <div class="panel-input panel-input-proof">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <div style="font-size:12px;color:var(--text2)">
+              청크 <span id="current-chunk-number">#1</span>
+            </div>
+            <div class="genre-row" style="margin:0">
+              <div class="genre-chip on" onclick="selectGenre(this)">문학·소설</div>
+              <div class="genre-chip" onclick="selectGenre(this)">에세이</div>
+              <div class="genre-chip" onclick="selectGenre(this)">자기계발</div>
+              <div class="genre-chip" onclick="selectGenre(this)">시·시집</div>
+              <div class="genre-chip" onclick="selectGenre(this)">인문·교양</div>
+              <div class="genre-chip" onclick="selectGenre(this)">경제·경영</div>
+            </div>
+          </div>
+
+          <textarea id="inp-proofreading" placeholder="이 청크의 원고를 붙여넣으세요...&#10;&#10;💡 팁: 긴 원고는 챕터나 장면별로 나눠서 교열하세요"
+            oninput="updateStat('inp-proofreading','stat-proofreading')"
+            ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)"
+            ondrop="handleDrop(event,'inp-proofreading','stat-proofreading')"></textarea>
+          <div class="stat-bar" id="stat-proofreading">0자 · 0단어 · 읽기 약 0분</div>
+        </div>
+
+        <!-- 액션 버튼 -->
+        <div class="action-bar">
+          <button class="btn btn-run" id="btn-first-chunk" onclick="startFirstChunk()">
+            <i class="ti ti-play"></i>1차 교열 시작<kbd>⌘↵</kbd>
+          </button>
+          <button class="btn btn-run" id="btn-next-chunk" onclick="proofreadNextChunk()" style="display:none">
+            <i class="ti ti-arrow-right"></i>다음 청크 교열
+          </button>
+          <button class="btn btn-p" id="btn-finish-session" onclick="finishSession()" style="display:none">
+            <i class="ti ti-check"></i>교열 완료 & 세션 종료
+          </button>
+
+          <div class="progress-bar" id="progress-proofreading" style="display:none">
+            <div class="progress-fill"></div>
+            <span class="progress-text">교열 중...</span>
+          </div>
+
+          <button class="btn btn-sec" onclick="saveChunkResult()"><i class="ti ti-device-floppy"></i>저장</button>
+          <button class="btn btn-sec" onclick="copyProofResult()"><i class="ti ti-clipboard"></i>복사</button>
+        </div>
+
+        <!-- 청크 결과 -->
+        <div class="panel-output" id="out-proofreading">
+          <div class="output-empty">장르를 선택하고 첫 번째 청크를 입력한 후 교열을 시작하세요</div>
+        </div>
+
+        <!-- 누적 설정집 패널 -->
+        <div id="accumulated-worldbible" style="display:none;margin-top:20px"></div>
+
+        <!-- 모순 목록 패널 -->
+        <div id="conflicts-panel" style="display:none;margin-top:20px"></div>
+
+      </div>
+    </div>
