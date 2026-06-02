@@ -78,8 +78,8 @@ async function load() {
     state.projects = [
       {
         id: 'demo-1',
-        name: '소설: 시간의 조각들',
-        type: 'novel',
+        title: '시간의 조각들',
+        genre: '소설 — 판타지',
         created: Date.now() - 86400000 * 5,
         updated: Date.now() - 86400000 * 1,
         wordCount: 45230,
@@ -87,8 +87,8 @@ async function load() {
       },
       {
         id: 'demo-2',
-        name: '에세이: 일상의 발견',
-        type: 'essay',
+        title: '일상의 발견',
+        genre: '에세이 — 일상',
         created: Date.now() - 86400000 * 15,
         updated: Date.now() - 86400000 * 3,
         wordCount: 12400,
