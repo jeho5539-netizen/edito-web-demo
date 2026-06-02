@@ -69,7 +69,51 @@ async function load() {
     const raw = localStorage.getItem('edito_data');
     if (raw) d = JSON.parse(raw);
   }
-  if (d) { state.projects = d.projects||[]; state.results = d.results||[]; state.trash = d.trash||[]; }
+  if (d) {
+    state.projects = d.projects||[];
+    state.results = d.results||[];
+    state.trash = d.trash||[];
+  } else {
+    // 데모용 샘플 데이터
+    state.projects = [
+      {
+        id: 'demo-1',
+        name: '소설: 시간의 조각들',
+        type: 'novel',
+        created: Date.now() - 86400000 * 5,
+        updated: Date.now() - 86400000 * 1,
+        wordCount: 45230,
+        status: 'active'
+      },
+      {
+        id: 'demo-2',
+        name: '에세이: 일상의 발견',
+        type: 'essay',
+        created: Date.now() - 86400000 * 15,
+        updated: Date.now() - 86400000 * 3,
+        wordCount: 12400,
+        status: 'active'
+      }
+    ];
+    state.results = [
+      {
+        id: 'result-1',
+        projectId: 'demo-1',
+        type: 'proofreading',
+        created: Date.now() - 86400000 * 2,
+        title: '1장 교열 결과',
+        content: '총 23개 수정 제안'
+      },
+      {
+        id: 'result-2',
+        projectId: 'demo-1',
+        type: 'analysis',
+        created: Date.now() - 86400000 * 3,
+        title: '원고 분석 리포트',
+        content: '주제: 시간여행, 분위기: 서정적'
+      }
+    ];
+  }
 }
 
 // ─── 패널 전환 ────────────────────────────────────────────
