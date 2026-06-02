@@ -1,0 +1,410 @@
+/* ═══════════════════════════════════════════════════════════
+   Diff Viewer - Before/After 비교 뷰어
+   ═══════════════════════════════════════════════════════════ */
+
+.diff-viewer {
+  display: none; /* 기본 숨김, 결과 있을 때만 표시 */
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 16px;
+}
+
+.diff-viewer.active {
+  display: block;
+}
+
+/* ─ 헤더 (탭 전환) */
+.diff-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg4);
+  border-bottom: 1px solid var(--border2);
+  padding: 12px 16px;
+}
+
+.diff-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.diff-tab {
+  padding: 6px 14px;
+  background: none;
+  border: none;
+  color: var(--text3);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.diff-tab:hover {
+  background: var(--bg3);
+  color: var(--text2);
+}
+
+.diff-tab.active {
+  background: var(--c00);
+  color: var(--c16);
+}
+
+.diff-stats {
+  display: flex;
+  gap: 16px;
+  font-size: 11px;
+  color: var(--text3);
+}
+
+.diff-stat {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.diff-stat-value {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.diff-stat.added .diff-stat-value { color: #5fb950; }
+.diff-stat.removed .diff-stat-value { color: #f85149; }
+.diff-stat.modified .diff-stat-value { color: #58a6ff; }
+
+/* ─ 컨텐츠 영역 */
+.diff-content {
+  position: relative;
+}
+
+.diff-panel {
+  display: none;
+  padding: 0;
+}
+
+.diff-panel.active {
+  display: block;
+}
+
+/* ─ 사이드바이사이드 뷰 */
+.diff-sidebyside {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  min-height: 400px;
+  max-height: 600px;
+  overflow: auto;
+}
+
+.diff-column {
+  background: var(--bg2);
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.diff-column-header {
+  position: sticky;
+  top: 0;
+  background: var(--bg4);
+  padding: 8px 12px;
+  margin: -16px -16px 12px -16px;
+  border-bottom: 1px solid var(--border2);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text2);
+  z-index: 10;
+}
+
+.diff-column-header.before { color: #f85149; }
+.diff-column-header.after { color: #5fb950; }
+
+.diff-text {
+  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--text);
+}
+
+/* ─ 통합 diff 뷰 */
+.diff-unified {
+  padding: 16px;
+  max-height: 600px;
+  overflow-y: auto;
+  background: var(--bg2);
+  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+.diff-line {
+  padding: 2px 8px;
+  margin: 1px 0;
+  border-radius: 3px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.diff-line.added {
+  background: rgba(95, 185, 80, 0.15);
+  color: #5fb950;
+}
+
+.diff-line.removed {
+  background: rgba(248, 81, 73, 0.15);
+  color: #f85149;
+  text-decoration: line-through;
+}
+
+.diff-line.context {
+  color: var(--text2);
+}
+
+/* ─ 변경사항 목록 뷰 */
+.diff-changes-list {
+  padding: 16px;
+  max-height: 600px;
+  overflow-y: auto;
+  background: var(--bg2);
+}
+
+.change-item {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 8px;
+  transition: all 0.2s;
+}
+
+.change-item:hover {
+  border-color: var(--border3);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.change-item.accepted {
+  opacity: 0.6;
+  border-color: #5fb950;
+}
+
+.change-item.rejected {
+  opacity: 0.4;
+  border-color: #f85149;
+  text-decoration: line-through;
+}
+
+.change-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.change-type {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: var(--bg4);
+  color: var(--text3);
+}
+
+.change-type.grammar { color: #58a6ff; background: rgba(88, 166, 255, 0.15); }
+.change-type.style { color: #bc8cff; background: rgba(188, 140, 255, 0.15); }
+.change-type.consistency { color: #f0883e; background: rgba(240, 136, 62, 0.15); }
+.change-type.contradiction { color: #f85149; background: rgba(248, 81, 73, 0.15); }
+
+.change-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.change-btn {
+  padding: 4px 10px;
+  font-size: 11px;
+  border: 1px solid var(--border2);
+  background: var(--bg4);
+  color: var(--text2);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.change-btn:hover {
+  background: var(--bg3);
+  border-color: var(--border3);
+  color: var(--text);
+}
+
+.change-btn.accept {
+  border-color: #5fb950;
+  color: #5fb950;
+}
+
+.change-btn.accept:hover {
+  background: rgba(95, 185, 80, 0.15);
+}
+
+.change-btn.reject {
+  border-color: #f85149;
+  color: #f85149;
+}
+
+.change-btn.reject:hover {
+  background: rgba(248, 81, 73, 0.15);
+}
+
+.change-text {
+  margin-bottom: 8px;
+}
+
+.change-text-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text3);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.change-text-content {
+  padding: 8px;
+  background: var(--bg4);
+  border-radius: 4px;
+  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.change-text-content.before {
+  background: rgba(248, 81, 73, 0.1);
+  border-left: 3px solid #f85149;
+}
+
+.change-text-content.after {
+  background: rgba(95, 185, 80, 0.1);
+  border-left: 3px solid #5fb950;
+}
+
+.change-reason {
+  font-size: 11px;
+  color: var(--text3);
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.change-reason i {
+  margin-top: 2px;
+  color: var(--text3);
+}
+
+/* ─ 액션 바 */
+.diff-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--bg4);
+  border-top: 1px solid var(--border2);
+}
+
+.diff-actions-left,
+.diff-actions-right {
+  display: flex;
+  gap: 8px;
+}
+
+.diff-action-btn {
+  padding: 6px 14px;
+  font-size: 12px;
+  border: 1px solid var(--border2);
+  background: var(--bg3);
+  color: var(--text);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+}
+
+.diff-action-btn:hover {
+  background: var(--bg2);
+  border-color: var(--border3);
+}
+
+.diff-action-btn.primary {
+  background: var(--c00);
+  color: var(--c16);
+  border-color: var(--c00);
+}
+
+.diff-action-btn.primary:hover {
+  background: var(--c03);
+}
+
+.diff-action-btn.success {
+  background: #5fb950;
+  color: var(--c16);
+  border-color: #5fb950;
+}
+
+.diff-action-btn.success:hover {
+  background: #4a9640;
+}
+
+.diff-action-btn.danger {
+  background: #f85149;
+  color: var(--c16);
+  border-color: #f85149;
+}
+
+.diff-action-btn.danger:hover {
+  background: #d63f37;
+}
+
+/* ─ 빈 상태 */
+.diff-empty {
+  padding: 48px;
+  text-align: center;
+  color: var(--text3);
+  font-size: 13px;
+}
+
+.diff-empty i {
+  font-size: 48px;
+  opacity: 0.3;
+  margin-bottom: 12px;
+}
+
+/* ─ 반응형 */
+@media (max-width: 1200px) {
+  .diff-sidebyside {
+    grid-template-columns: 1fr;
+  }
+
+  .diff-column-header.before::after {
+    content: ' (원본)';
+  }
+
+  .diff-column-header.after::after {
+    content: ' (수정본)';
+  }
+}

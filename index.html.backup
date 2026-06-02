@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Edito — 출판 도우미</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/full-edit.css">
+<link rel="stylesheet" href="css/progress-sidebar.css">
+<link rel="stylesheet" href="css/diff-viewer.css">
+<link rel="stylesheet" href="css/demo.css">
+</head>
+<body>
+
+<!-- ── 스플래시 화면 ──────────────────────────────────── -->
+<div id="splash">
+  <div class="splash-inner">
+    <svg class="splash-logo" width="56" height="56" viewBox="0 0 72 72">
+      <rect width="72" height="72" rx="14" fill="#1a1918"/>
+      <rect x="4" y="4" width="64" height="64" rx="10" fill="#232220"/>
+      <rect x="14" y="20" width="26" height="34" rx="2" fill="none" stroke="#c9a96e" stroke-width="1.8"/>
+      <rect x="14" y="20" width="5" height="34" rx="1" fill="#c9a96e" opacity="0.35"/>
+      <line x1="22" y1="29" x2="37" y2="29" stroke="#c9a96e" stroke-width="1.1" opacity="0.65"/>
+      <line x1="22" y1="34" x2="37" y2="34" stroke="#c9a96e" stroke-width="1.1" opacity="0.65"/>
+      <line x1="22" y1="39" x2="34" y2="39" stroke="#c9a96e" stroke-width="1.1" opacity="0.65"/>
+      <path d="M54 14 C48 16 42 24 40 32 C38 40 36 46 30 50" fill="none" stroke="#c9a96e" stroke-width="1.5" stroke-linecap="round"/>
+      <circle cx="30" cy="50" r="1.8" fill="#c9a96e"/>
+    </svg>
+    <div class="splash-title">Edito</div>
+    <div class="splash-sub">출판 도우미</div>
+    <div class="splash-engines">
+      <div class="se-row" id="se-ollama">
+        <div class="se-dot" id="se-dot-ollama"></div>
+        <span class="se-name">Ollama (교열 · 분석 · 마케팅)</span>
+        <span class="se-msg" id="se-msg-ollama">대기 중...</span>
+      </div>
+      <div class="se-row" id="se-sd">
+        <div class="se-dot" id="se-dot-sd"></div>
+        <span class="se-name">Stable Diffusion (표지 · 영상)</span>
+        <span class="se-msg" id="se-msg-sd">대기 중...</span>
+      </div>
+    </div>
+    <div class="splash-bar-wrap"><div class="splash-bar-fill" id="splash-fill"></div></div>
+    <div class="splash-msg" id="splash-msg">엔진 초기화 중...</div>
+    <button class="splash-skip" onclick="hideSplash()">건너뛰기</button>
+  </div>
+</div>
+
+<!-- ── 앱 본체 ────────────────────────────────────────── -->
+<div class="app" id="app" style="display:none">
+
+  <!-- 사이드바 -->
+  <div class="sidebar">
+    <div class="sidebar-top">
+      <svg width="26" height="26" viewBox="0 0 72 72">
+        <rect width="72" height="72" rx="14" fill="#1a1918"/>
+        <rect x="4" y="4" width="64" height="64" rx="10" fill="#232220"/>
+        <rect x="14" y="20" width="26" height="34" rx="2" fill="none" stroke="#c9a96e" stroke-width="1.8"/>
+        <rect x="14" y="20" width="5" height="34" rx="1" fill="#c9a96e" opacity="0.35"/>
+        <line x1="22" y1="29" x2="37" y2="29" stroke="#c9a96e" stroke-width="1.1" opacity="0.65"/>
+        <line x1="22" y1="34" x2="37" y2="34" stroke="#c9a96e" stroke-width="1.1" opacity="0.65"/>
+        <line x1="22" y1="39" x2="34" y2="39" stroke="#c9a96e" stroke-width="1.1" opacity="0.65"/>
+        <path d="M54 14 C48 16 42 24 40 32 C38 40 36 46 30 50" fill="none" stroke="#c9a96e" stroke-width="1.5" stroke-linecap="round"/>
+        <circle cx="30" cy="50" r="1.8" fill="#c9a96e"/>
+      </svg>
+      <div class="logo-text">
+        <span class="logo-name">Edito</span>
+        <span class="logo-sub">출판 도우미</span>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <!-- 현재 프로젝트 -->
+      <div class="nav-proj-box" id="nav-proj-box">
+        <i class="ti ti-book-off" id="nav-proj-icon"></i>
+        <span id="nav-proj-name">프로젝트 없음</span>
+      </div>
+
+      <!-- 핵심 기능 -->
+      <div class="nav-label-group">편집</div>
+      <a class="nav-item" id="ni-correction"  onclick="sw('correction')">  <i class="ti ti-text-spellcheck"></i>교정         <span class="nav-hint">⌘1</span></a>
+      <a class="nav-item" id="ni-proofreading"onclick="sw('proofreading')"><i class="ti ti-edit"></i>           교열         <span class="nav-hint">⌘2</span></a>
+      <a class="nav-item nav-item-primary" id="ni-full-edit" onclick="sw('full-edit')"><i class="ti ti-bolt"></i> 통합 편집 <span class="nav-hint">⌘R</span></a>
+
+      <div class="nav-label-group">분석 & 마케팅</div>
+      <a class="nav-item" id="ni-analysis" onclick="sw('analysis')"><i class="ti ti-chart-bar"></i>원고 분석</a>
+      <a class="nav-item" id="ni-marketing" onclick="sw('marketing')"><i class="ti ti-speakerphone"></i>마케팅 문구</a>
+
+      <div class="nav-label-group">크리에이티브</div>
+      <a class="nav-item" id="ni-cover" onclick="sw('cover')"><i class="ti ti-palette"></i>컨셉 스케치</a>
+      <a class="nav-item" id="ni-video" onclick="sw('video')"><i class="ti ti-movie"></i>홍보 영상</a>
+
+      <!-- 프로젝트 목록 -->
+      <div class="nav-label-group" style="margin-top:6px">
+        프로젝트
+        <button class="nav-add-btn" onclick="openNewProject()" title="새 프로젝트 ⌘N"><i class="ti ti-plus"></i></button>
+      </div>
+      <div id="project-list"></div>
+
+      <!-- 하단 메뉴 -->
+      <div class="nav-bottom">
+        <a class="nav-item" id="ni-trash"    onclick="sw('trash')">   <i class="ti ti-trash"></i>    휴지통 <span class="trash-badge" id="trash-count" style="display:none">0</span></a>
+        <a class="nav-item" id="ni-settings" onclick="sw('settings')"><i class="ti ti-settings"></i> 설정   <span class="nav-hint">⌘,</span></a>
+      </div>
+    </nav>
+
+    <!-- 엔진 상태 -->
+    <div class="sidebar-engines">
+      <div class="eng-row"><div class="eng-dot" id="ed-ollama"></div><span>Ollama</span></div>
+      <div class="eng-row"><div class="eng-dot" id="ed-sd"></div><span>Stable Diffusion</span></div>
+    </div>
+
+    <button class="theme-btn" onclick="toggleTheme()">
+      <i class="ti ti-sun" id="theme-icon"></i>
+      <span id="theme-label">라이트 모드</span>
+    </button>
+  </div>
+
+  <!-- 메인 영역 -->
+  <div class="main">
+
+    <!-- 홈 -->
+    <div class="panel panel-home active" id="panel-home">
+      <div class="home-center">
+        <svg width="52" height="52" viewBox="0 0 72 72" style="margin-bottom:10px">
+          <rect width="72" height="72" rx="14" fill="#1a1918"/>
+          <rect x="4" y="4" width="64" height="64" rx="10" fill="#232220"/>
+          <rect x="14" y="20" width="26" height="34" rx="2" fill="none" stroke="#c9a96e" stroke-width="1.8"/>
+          <rect x="14" y="20" width="5" height="34" rx="1" fill="#c9a96e" opacity="0.35"/>
+          <line x1="22" y1="29" x2="37" y2="29" stroke="#c9a96e" stroke-width="1.1" opacity="0.65"/>
+          <line x1="22" y1="34" x2="37" y2="34" stroke="#c9a96e" stroke-width="1.1" opacity="0.65"/>
+          <line x1="22" y1="39" x2="34" y2="39" stroke="#c9a96e" stroke-width="1.1" opacity="0.65"/>
+          <path d="M54 14 C48 16 42 24 40 32 C38 40 36 46 30 50" fill="none" stroke="#c9a96e" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="30" cy="50" r="1.8" fill="#c9a96e"/>
+        </svg>
+        <h1 class="home-title">Edito</h1>
+        <p class="home-sub">프로젝트를 선택하거나 새로 만들어 시작하세요</p>
+        <button class="btn btn-p" onclick="openNewProject()" style="margin-top:16px">
+          <i class="ti ti-plus"></i>새 프로젝트 만들기
+        </button>
+        <div class="home-shortcuts">
+          <span><kbd>⌘N</kbd>새 프로젝트</span>
+          <span><kbd>⌘↵</kbd>실행</span>
+          <span><kbd>⌘S</kbd>저장</span>
+          <span><kbd>⌘,</kbd>설정</span>
+        </div>
+        <div id="home-recent" class="home-recent"></div>
+      </div>
+    </div>
+
+    <!-- ── 원고 분석 ────────────────────────────────── -->
+    <div class="panel panel-work" id="panel-analysis">
+      <div class="panel-header">
+        <div class="ph-info">
+          <span class="ph-title">원고 분석</span>
+          <span class="ph-engine">EXAONE 3.0 (한국어 특화) · LLM 기반 장르/시장성 분석</span>
+        </div>
+        <div class="ph-actions">
+          <button class="btn-icon" onclick="importFile('inp-analysis')" title="파일 불러오기"><i class="ti ti-file-import"></i></button>
+          <button class="btn-icon" onclick="showConsistencyReport('inp-analysis')" title="빠른 검사"><i class="ti ti-stethoscope"></i></button>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="panel-input">
+          <textarea id="inp-analysis" placeholder="분석할 원고를 붙여넣으세요... (최소 100자)&#10;.txt 파일을 드래그&드롭 해도 됩니다"
+            oninput="updateStat('inp-analysis','stat-analysis')"
+            ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)"
+            ondrop="handleDrop(event,'inp-analysis','stat-analysis')"></textarea>
+          <div class="stat-bar" id="stat-analysis">0자 · 0단어 · 읽기 약 0분</div>
+        </div>
+        <div class="action-bar">
+          <button class="btn btn-run" onclick="startAnalysis()">
+            <i class="ti ti-chart-bar"></i>분석 시작<kbd>⌘↵</kbd>
+          </button>
+          <button class="btn btn-sec" onclick="saveResult('analysis')"><i class="ti ti-device-floppy"></i>저장</button>
+          <button class="btn btn-sec" onclick="copyAnalysis()"><i class="ti ti-clipboard"></i>복사</button>
+          <button class="btn btn-sec" onclick="exportAnalysis()"><i class="ti ti-download"></i>내보내기</button>
+        </div>
+        <div class="panel-output" id="out-analysis">
+          <div class="output-empty">원고를 입력하고 분석을 시작하세요</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 교정 ─────────────────────────────────────── -->
+    <div class="panel panel-work" id="panel-correction">
+      <div class="panel-header">
+        <div class="ph-info">
+          <span class="ph-title">교정</span>
+          <span class="ph-engine">바른AI · 국립국어원 어문규범 · 병렬 처리 (4 workers)</span>
+        </div>
+        <div class="ph-actions">
+          <button class="btn-icon" onclick="importFile('inp-correction')" title="파일 불러오기"><i class="ti ti-file-import"></i></button>
+          <button class="btn-icon" onclick="openFindReplace()" title="찾기·바꾸기"><i class="ti ti-replace"></i></button>
+          <button class="btn-icon" onclick="openPreprocessMenu()" title="전처리 도구"><i class="ti ti-wand"></i></button>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="panel-input">
+          <textarea id="inp-correction" placeholder="교정할 원고를 붙여넣으세요...&#10;.txt 파일 드래그&드롭 가능"
+            oninput="updateStat('inp-correction','stat-correction');updateCorrStats()"
+            ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)"
+            ondrop="handleDrop(event,'inp-correction','stat-correction')"></textarea>
+          <div class="corr-stat-row">
+            <div class="stat-box"><span id="cs-total">0</span><small>글자</small></div>
+            <div class="stat-box"><span id="cs-nospace">0</span><small>공백 제외</small></div>
+            <div class="stat-box"><span id="cs-sentence">0</span><small>문장</small></div>
+            <div class="stat-box" style="color:var(--danger)"><span id="cs-errors">0</span><small>오류 발견</small></div>
+            <div class="stat-bar" id="stat-correction" style="margin-left:auto">0자</div>
+          </div>
+        </div>
+        <div class="action-bar">
+          <button class="btn btn-run" onclick="startCorrection()">
+            <i class="ti ti-text-spellcheck"></i>교정 시작<kbd>⌘↵</kbd>
+          </button>
+          <div class="progress-bar" id="progress-correction" style="display:none">
+            <div class="progress-fill"></div>
+            <span class="progress-text">교정 중...</span>
+          </div>
+          <button class="btn btn-sec" id="btn-accept-all" onclick="acceptAllCorrections()" style="display:none"><i class="ti ti-check"></i>전체 수락</button>
+          <button class="btn btn-sec" onclick="saveResult('correction')"><i class="ti ti-device-floppy"></i>저장</button>
+          <button class="btn btn-sec" onclick="copyCorrected()"><i class="ti ti-clipboard"></i>교정본 복사</button>
+        </div>
+        <div class="panel-output" id="out-correction">
+          <div class="output-empty">원고를 입력하고 교정을 시작하세요</div>
+        </div>
+        <!-- Diff Viewer -->
+        <div id="diff-correction"></div>
+      </div>
+    </div>
+
+    <!-- ── 통합 편집 (교정+교열) ─────────────────────── -->
+    <div class="panel panel-work" id="panel-full-edit">
+      <div class="panel-header">
+        <div class="ph-info">
+          <span class="ph-title">통합 편집</span>
+          <span class="ph-engine">교정(바른AI) → 교열(Ollama) 자동 실행 · 3단 비교 뷰</span>
+        </div>
+        <div class="ph-actions">
+          <button class="btn-icon" onclick="importFile('inp-full-edit')" title="파일 불러오기"><i class="ti ti-file-import"></i></button>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="panel-input panel-input-proof">
+          <div class="genre-row">
+            <div class="genre-chip-full on" onclick="selectGenreFull(this)">문학·소설</div>
+            <div class="genre-chip-full" onclick="selectGenreFull(this)">에세이</div>
+            <div class="genre-chip-full" onclick="selectGenreFull(this)">자기계발</div>
+            <div class="genre-chip-full" onclick="selectGenreFull(this)">시·시집</div>
+            <div class="genre-chip-full" onclick="selectGenreFull(this)">인문·교양</div>
+            <div class="genre-chip-full" onclick="selectGenreFull(this)">경제·경영</div>
+          </div>
+          <div style="margin-bottom:10px">
+            <input type="text" id="inp-full-requests" placeholder="교열 추가 요청사항 (선택) 예: 문장을 간결하게, 전문용어 최소화"
+              style="width:100%;padding:8px;background:#2a2826;border:1px solid #c9a96e33;border-radius:6px;color:#e8e6e3;font-size:12px">
+          </div>
+          <textarea id="inp-full-edit" placeholder="원고를 입력하세요...&#10;교정 → 교열이 자동으로 진행됩니다"
+            oninput="updateStat('inp-full-edit','stat-full-edit')"
+            ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)"
+            ondrop="handleDrop(event,'inp-full-edit','stat-full-edit')"></textarea>
+          <div class="stat-bar" id="stat-full-edit">0자 · 0단어 · 읽기 약 0분</div>
+        </div>
+        <div class="action-bar">
+          <button class="btn btn-run" onclick="startFullEdit()">
+            <i class="ti ti-bolt"></i>통합 편집 시작<kbd>⌘↵</kbd>
+          </button>
+          <div class="progress-bar" id="progress-full-edit" style="display:none">
+            <div class="progress-fill"></div>
+            <span class="progress-text">준비 중...</span>
+          </div>
+          <button class="btn btn-sec" onclick="saveResult('full-edit')"><i class="ti ti-device-floppy"></i>저장</button>
+        </div>
+        <div class="panel-output" id="out-full-edit">
+          <div class="output-empty">장르를 선택하고 원고를 입력한 후 통합 편집을 시작하세요</div>
+        </div>
+        <!-- Diff Viewer -->
+        <div id="diff-full-edit"></div>
+      </div>
+    </div>
+
+    <!-- ── 교열 ─────────────────────────────────────── -->
+    <div class="panel panel-work" id="panel-proofreading">
+      <div class="panel-header">
+        <div class="ph-info">
+          <span class="ph-title">교열</span>
+          <span class="ph-engine">EXAONE 3.0 (한국어 특화) · 장르별 기준 + 커스텀 사전</span>
+        </div>
+        <div class="ph-actions">
+          <button class="btn-icon" onclick="importFile('inp-proofreading')" title="파일 불러오기"><i class="ti ti-file-import"></i></button>
+          <button class="btn-icon" onclick="showConsistencyReport('inp-proofreading')" title="빠른 검사"><i class="ti ti-stethoscope"></i></button>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="panel-input panel-input-proof">
+          <div class="genre-row">
+            <div class="genre-chip on" onclick="selectGenre(this)">문학·소설</div>
+            <div class="genre-chip" onclick="selectGenre(this)">에세이</div>
+            <div class="genre-chip" onclick="selectGenre(this)">자기계발</div>
+            <div class="genre-chip" onclick="selectGenre(this)">시·시집</div>
+            <div class="genre-chip" onclick="selectGenre(this)">인문·교양</div>
+            <div class="genre-chip" onclick="selectGenre(this)">경제·경영</div>
+          </div>
+          <div style="margin-bottom:10px">
+            <input type="text" id="inp-proof-requests" placeholder="추가 요청사항 (선택) 예: 대화체를 더 자연스럽게, 비유 표현은 살리기"
+              style="width:100%;padding:8px;background:#2a2826;border:1px solid #c9a96e33;border-radius:6px;color:#e8e6e3;font-size:12px">
+          </div>
+          <textarea id="inp-proofreading" placeholder="교열할 원고를 붙여넣으세요...&#10;.txt 파일 드래그&드롭 가능"
+            oninput="updateStat('inp-proofreading','stat-proofreading')"
+            ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)"
+            ondrop="handleDrop(event,'inp-proofreading','stat-proofreading')"></textarea>
+          <div class="stat-bar" id="stat-proofreading">0자 · 0단어 · 읽기 약 0분</div>
+        </div>
+        <div class="action-bar">
+          <button class="btn btn-run" onclick="startProofreading()">
+            <i class="ti ti-edit"></i>교열 시작<kbd>⌘↵</kbd>
+          </button>
+          <div class="progress-bar" id="progress-proofreading" style="display:none">
+            <div class="progress-fill"></div>
+            <span class="progress-text">교열 중...</span>
+          </div>
+          <button class="btn btn-sec" onclick="saveResult('proofreading')"><i class="ti ti-device-floppy"></i>저장</button>
+          <button class="btn btn-sec" onclick="copyProofResult()"><i class="ti ti-clipboard"></i>교열본 복사</button>
+          <button class="btn btn-sec" onclick="exportProofResult()"><i class="ti ti-markdown"></i>내보내기</button>
+        </div>
+        <div class="panel-output" id="out-proofreading">
+          <div class="output-empty">장르를 선택하고 원고를 입력한 후 교열을 시작하세요</div>
+        </div>
+        <!-- Diff Viewer -->
+        <div id="diff-proofreading"></div>
+
+        <!-- ① 설정집 검토 패널 (고정 세계관 정보) -->
+        <div id="world-bible-panel" style="display:none;margin-top:16px;background:#1e1c1a;border:1px solid #7eb8f744;border-radius:10px;padding:16px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <div style="font-weight:600;font-size:13px;color:#7eb8f7">
+              <i class="ti ti-books"></i> 설정집 업데이트
+              <span id="bible-count-badge" style="font-size:11px;font-weight:400;color:var(--text3);margin-left:6px"></span>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center">
+              <button onclick="toggleAllCheck('bible-list',true)"  style="background:none;border:none;color:var(--text3);font-size:11px;cursor:pointer">전체선택</button>
+              <span style="color:var(--text3)">·</span>
+              <button onclick="toggleAllCheck('bible-list',false)" style="background:none;border:none;color:var(--text3);font-size:11px;cursor:pointer">전체해제</button>
+            </div>
+          </div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:12px">
+            이번 교열에서 새로 발견된 <strong style="color:#7eb8f7">고정 세계관 정보</strong>입니다. (인물 프로필, 장소 설명, 고유 용어, 세계관 규칙)
+          </div>
+          <div id="bible-list" style="display:flex;flex-direction:column;gap:5px;max-height:260px;overflow-y:auto"></div>
+          <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
+            <button class="btn btn-sec" onclick="saveWorldBible()" style="font-size:12px;padding:8px 16px;border-color:#7eb8f7;color:#7eb8f7">
+              <i class="ti ti-books"></i>설정집에 저장
+            </button>
+            <span id="bible-save-hint" style="font-size:11px;color:var(--text3)">선택한 항목을 설정집에 추가합니다</span>
+          </div>
+        </div>
+
+        <!-- ② 커스텀 사전 검토 패널 (이야기 흐름 변화) -->
+        <div id="narrative-state-panel" style="display:none;margin-top:12px;background:#1e1c1a;border:1px solid #c9a96e33;border-radius:10px;padding:16px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <div style="font-weight:600;font-size:13px;color:#c9a96e">
+              <i class="ti ti-git-branch"></i> 커스텀 사전 업데이트
+              <span id="narrative-count-badge" style="font-size:11px;font-weight:400;color:var(--text3);margin-left:6px"></span>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center">
+              <button onclick="toggleAllCheck('narrative-state-list',true)"  style="background:none;border:none;color:var(--text3);font-size:11px;cursor:pointer">전체선택</button>
+              <span style="color:var(--text3)">·</span>
+              <button onclick="toggleAllCheck('narrative-state-list',false)" style="background:none;border:none;color:var(--text3);font-size:11px;cursor:pointer">전체해제</button>
+            </div>
+          </div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:12px">
+            이번 교열에서 파악된 <strong style="color:#c9a96e">이야기 흐름 변화</strong>입니다. (상태 변화, 모순, 사건) 다음 교열 시 자동 반영됩니다.
+          </div>
+          <div id="narrative-state-list" style="display:flex;flex-direction:column;gap:5px;max-height:260px;overflow-y:auto"></div>
+          <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
+            <button class="btn btn-run" onclick="saveNarrativeToDict()" style="font-size:12px;padding:8px 16px">
+              <i class="ti ti-database-plus"></i>커스텀 사전에 저장
+            </button>
+            <span id="narrative-save-hint" style="font-size:11px;color:var(--text3)">선택된 항목을 커스텀 사전에 추가합니다</span>
+          </div>
+        </div>
+
+        <!-- 같은 프로젝트 안내 -->
+        <div id="same-project-tip" style="display:none;margin-top:10px;padding:10px 14px;background:#c9a96e11;border:1px solid #c9a96e33;border-radius:8px;font-size:11px;color:#c9a96e">
+          <i class="ti ti-info-circle"></i> <strong>같은 원고의 챕터는 같은 프로젝트에서 교열하세요.</strong>
+          설정집과 커스텀 사전이 챕터를 거듭할수록 쌓여 점점 정밀해집니다.
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 표지 디자인 ───────────────────────────────── -->
+    <div class="panel panel-work" id="panel-cover">
+      <div class="panel-header">
+        <div class="ph-info">
+          <span class="ph-title">표지 컨셉 스케치</span>
+          <span class="ph-engine">LLM 프롬프트 생성 → SD 이미지 생성 · 3가지 변형 · 디자이너 브리핑용</span>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="panel-input panel-input-cover">
+          <div class="form-row2">
+            <div class="fg"><label class="fl">장르</label>
+              <select id="cover-genre"><option>소설 — 문학</option><option>소설 — 장르</option><option>에세이</option><option>자기계발</option><option>시집</option><option>인문/교양</option></select>
+            </div>
+            <div class="fg"><label class="fl">분위기</label><input type="text" id="cover-mood" placeholder="예: 어둡고 쓸쓸한"></div>
+          </div>
+          <div class="form-row3">
+            <div class="fg"><label class="fl">배경</label><input type="text" id="cover-bg" placeholder="예: 안개 낀 숲"></div>
+            <div class="fg"><label class="fl">인물</label><input type="text" id="cover-char" placeholder="예: 30대 여성, 뒷모습"></div>
+            <div class="fg"><label class="fl">소품</label><input type="text" id="cover-props" placeholder="예: 낡은 편지"></div>
+          </div>
+          <div class="style-scroll">
+            <div class="style-chip on" onclick="selStyle(this)">미니멀·여백</div>
+            <div class="style-chip" onclick="selStyle(this)">수채화 일러스트</div>
+            <div class="style-chip" onclick="selStyle(this)">유화·회화</div>
+            <div class="style-chip" onclick="selStyle(this)">시네마틱 실사</div>
+            <div class="style-chip" onclick="selStyle(this)">그래픽·팝아트</div>
+            <div class="style-chip" onclick="selStyle(this)">흑백·누아르</div>
+            <div class="style-chip" onclick="selStyle(this)">한국 전통화</div>
+            <div class="style-chip" onclick="selStyle(this)">디지털 아트</div>
+            <div class="style-chip" onclick="selStyle(this)">빈티지·레트로</div>
+            <div class="style-chip" onclick="selStyle(this)">만화·웹툰</div>
+            <div class="style-chip" onclick="selStyle(this)">감성·무드</div>
+          </div>
+        </div>
+        <div class="action-bar">
+          <button class="btn btn-run" onclick="startCoverGeneration()">
+            <i class="ti ti-wand"></i>시안 3종 생성<kbd>⌘↵</kbd>
+          </button>
+          <button class="btn btn-sec" onclick="saveResult('cover')"><i class="ti ti-device-floppy"></i>저장</button>
+          <button class="btn btn-sec" onclick="window.electronAPI?.openFolder()"><i class="ti ti-folder"></i>폴더</button>
+        </div>
+        <div class="panel-output" id="out-cover">
+          <div class="output-empty">설정을 입력하고 시안을 생성하세요<br><small style="opacity:0.5">Stable Diffusion이 필요합니다</small></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 홍보 영상 ─────────────────────────────────── -->
+    <div class="panel panel-work" id="panel-video">
+      <div class="panel-header">
+        <div class="ph-info">
+          <span class="ph-title">홍보 영상</span>
+          <span class="ph-engine">LLM 장면 변환 → Pexels 검색 → FFmpeg 자동 편집 · 30초</span>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="panel-input panel-input-video">
+          <div class="form-row2">
+            <div class="fg"><label class="fl">책 제목</label><input type="text" id="vid-title" placeholder="책 제목"></div>
+            <div class="fg"><label class="fl">영상 길이</label>
+              <select id="vid-duration"><option value="30">30초</option><option value="45">45초</option><option value="60">60초</option></select>
+            </div>
+          </div>
+          <div id="video-scenes">
+            <div class="scene-item" data-n="1"><span class="scene-label">장면 1 <small>오프닝</small></span><textarea rows="2" placeholder="장면 묘사..."></textarea></div>
+            <div class="scene-item" data-n="2"><span class="scene-label">장면 2 <small>전개</small></span><textarea rows="2" placeholder="장면 묘사..."></textarea></div>
+            <div class="scene-item" data-n="3"><span class="scene-label">장면 3 <small>클라이맥스</small></span><textarea rows="2" placeholder="장면 묘사..."></textarea></div>
+            <div class="scene-item" data-n="4" style="display:none"><span class="scene-label">장면 4 <small>후반</small> <button onclick="removeScene(4)" class="scene-rm">✕</button></span><textarea rows="2" placeholder="장면 묘사..."></textarea></div>
+            <div class="scene-item" data-n="5" style="display:none"><span class="scene-label">장면 5 <small>클로징</small> <button onclick="removeScene(5)" class="scene-rm">✕</button></span><textarea rows="2" placeholder="장면 묘사..."></textarea></div>
+          </div>
+          <button class="btn btn-sec" id="add-scene-btn" onclick="addScene()" style="margin-top:6px;font-size:11px"><i class="ti ti-plus"></i>장면 추가</button>
+          <div class="form-row2" style="margin-top:8px">
+            <div class="fg"><label class="fl">배경 음악</label>
+              <select id="vid-bgm"><option>감성 피아노</option><option>오케스트라</option><option>어쿠스틱 기타</option><option>앰비언트</option><option>재즈</option></select>
+            </div>
+            <div class="fg"><label class="fl">레퍼런스 이미지</label>
+              <div style="display:flex;align-items:center;gap:6px">
+                <input type="file" id="vid-ref-input" accept="image/*" style="display:none" onchange="previewRef(this)">
+                <button class="btn btn-sec" style="font-size:11px" onclick="document.getElementById('vid-ref-input').click()"><i class="ti ti-user"></i>선택</button>
+                <span id="vid-ref-name" style="font-size:11px;color:var(--text3)">없음</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="action-bar">
+          <button class="btn btn-run" onclick="startVideoGeneration()">
+            <i class="ti ti-movie"></i>영상 생성<kbd>⌘↵</kbd>
+          </button>
+          <button class="btn btn-sec" onclick="saveResult('video')"><i class="ti ti-device-floppy"></i>저장</button>
+        </div>
+        <div class="panel-output" id="out-video">
+          <div class="output-empty">장면을 입력하고 영상을 생성하세요<br><small style="opacity:0.5">SD + SVD + FFmpeg가 필요합니다</small></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 마케팅 문구 ───────────────────────────────── -->
+    <div class="panel panel-work" id="panel-marketing">
+      <div class="panel-header">
+        <div class="ph-info">
+          <span class="ph-title">마케팅 문구</span>
+          <span class="ph-engine">EXAONE 3.0 (한국어 특화) · 병렬 생성 (4종) · 보도자료/서점/제목/SNS</span>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="panel-input panel-input-mkt">
+          <div class="form-row2">
+            <div class="fg"><label class="fl">책 제목</label><input type="text" id="mkt-title" placeholder="책 제목 또는 가제목"></div>
+            <div class="fg"><label class="fl">저자명</label><input type="text" id="mkt-author" placeholder="저자명"></div>
+          </div>
+          <div class="form-row2">
+            <div class="fg"><label class="fl">장르</label><input type="text" id="mkt-genre" placeholder="예: 소설, 에세이"></div>
+            <div class="fg"><label class="fl">타겟</label><input type="text" id="mkt-target" placeholder="예: 20–30대 직장인"></div>
+          </div>
+          <div class="fg"><label class="fl">핵심 내용</label>
+            <textarea rows="3" id="mkt-summary" placeholder="책의 핵심 내용을 3–5줄로 요약..."></textarea>
+          </div>
+          <div class="mkt-types">
+            <div class="type-chip on" onclick="this.classList.toggle('on')"><i class="ti ti-news"></i>보도자료</div>
+            <div class="type-chip on" onclick="this.classList.toggle('on')"><i class="ti ti-book"></i>서점 소개문</div>
+            <div class="type-chip" onclick="this.classList.toggle('on')"><i class="ti ti-typography"></i>제목 후보</div>
+            <div class="type-chip" onclick="this.classList.toggle('on')"><i class="ti ti-brand-instagram"></i>SNS 카피</div>
+          </div>
+        </div>
+        <div class="action-bar">
+          <button class="btn btn-run" onclick="startMarketingGeneration()">
+            <i class="ti ti-sparkles"></i>문구 생성<kbd>⌘↵</kbd>
+          </button>
+          <button class="btn btn-sec" onclick="saveResult('marketing')"><i class="ti ti-device-floppy"></i>저장</button>
+          <button class="btn btn-sec" onclick="copyAllMarketing()"><i class="ti ti-clipboard"></i>전체 복사</button>
+        </div>
+        <div class="panel-output" id="out-marketing">
+          <div class="output-empty">정보를 입력하고 문구를 생성하세요</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 프로젝트 뷰 ────────────────────────────────── -->
+    <div class="panel" id="panel-project">
+      <div class="ph" id="proj-ph">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div><div class="pt" id="proj-title">프로젝트</div><div class="pd" id="proj-genre"></div></div>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-sec" onclick="renameCurrentProject()"><i class="ti ti-pencil"></i>이름 변경</button>
+            <button class="btn btn-danger" onclick="trashCurrentProject()"><i class="ti ti-trash"></i>삭제</button>
+          </div>
+        </div>
+      </div>
+      <div id="project-results-wrap" style="padding:0 24px 24px;overflow-y:auto;flex:1"></div>
+    </div>
+
+    <!-- ── 휴지통 ─────────────────────────────────────── -->
+    <div class="panel" id="panel-trash">
+      <div class="ph"><div class="pt">휴지통</div><div class="pd">30일 후 자동 완전 삭제</div></div>
+      <div id="trash-list-wrap" style="padding:0 24px 24px;overflow-y:auto;flex:1"></div>
+    </div>
+
+    <!-- ── 설정 ──────────────────────────────────────── -->
+    <div class="panel" id="panel-settings">
+      <div class="ph"><div class="pt">설정</div><div class="pd">API 키 및 엔진 설정</div></div>
+      <div style="padding:0 24px 24px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:14px">
+
+        <div class="settings-card">
+          <div class="sc-title"><i class="ti ti-text-spellcheck"></i>교정 — 바른AI</div>
+          <div class="sc-desc">국립국어원 어문규범 기반 맞춤법·띄어쓰기 교정</div>
+          <div class="fg" style="margin-top:10px">
+            <label class="fl">API 키</label>
+            <div style="display:flex;gap:8px">
+              <input type="password" id="bareun-api-key" placeholder="koba-XXXX-XXXX-XXXX-XXXX" style="flex:1">
+              <button class="btn btn-sec" onclick="toggleKeyVis('bareun-api-key',this)"><i class="ti ti-eye"></i></button>
+            </div>
+          </div>
+          <div class="sc-btns">
+            <button class="btn btn-p" onclick="saveSettings()"><i class="ti ti-device-floppy"></i>저장</button>
+            <button class="btn btn-sec" onclick="testBareun()"><i class="ti ti-plug"></i>연결 테스트</button>
+            <span id="bareun-status" class="status-text"></span>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <div class="sc-title"><i class="ti ti-cpu"></i>교열·분석·마케팅 — EXAONE 3.0</div>
+          <div class="sc-desc">한국어 특화 LLM (LG AI Research). Ollama로 자동 다운로드됩니다.<br>설치: <a onclick="window.electronAPI?.openExternal('https://ollama.ai')" style="color:var(--accent);cursor:pointer">ollama.ai</a></div>
+          <div class="fg" style="margin-top:10px">
+            <label class="fl">모델</label>
+            <select id="ollama-model" disabled>
+              <option value="exaone3.0:7.8b" selected>EXAONE 3.0 7.8B (한국어 최적화)</option>
+            </select>
+            <small style="color:var(--text3);display:block;margin-top:4px">※ Qwen/Llama 대비 한국어 성능 우수</small>
+          </div>
+          <div class="sc-btns">
+            <button class="btn btn-sec" onclick="testOllama()"><i class="ti ti-plug"></i>연결 확인</button>
+            <span id="ollama-status" class="status-text"></span>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <div class="sc-title"><i class="ti ti-photo"></i>표지·영상 — Stable Diffusion</div>
+          <div class="sc-desc">AUTOMATIC1111이 설치돼 있으면 자동 감지 및 시작됩니다.<br>기본 주소: <span style="color:var(--accent)">127.0.0.1:7861</span></div>
+          <div class="sc-btns" style="margin-top:10px">
+            <button class="btn btn-sec" onclick="testSD()"><i class="ti ti-plug"></i>연결 확인</button>
+            <span id="sd-status" class="status-text"></span>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <div class="sc-title"><i class="ti ti-palette"></i>외관</div>
+          <div class="sc-btns" style="margin-top:10px">
+            <button class="btn btn-sec" onclick="toggleTheme()"><i class="ti ti-sun" id="theme-icon2"></i>테마 전환</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- 새 프로젝트 모달 -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal()"></div>
+<div class="modal" id="modal-new-project">
+  <div class="modal-title">새 프로젝트</div>
+  <div class="fg" style="margin-top:14px">
+    <label class="fl">책 제목 / 원고명</label>
+    <input type="text" id="new-proj-title" placeholder="예: 인간의 우주적 초라함" onkeydown="if(event.key==='Enter'){event.preventDefault();createProject();}">
+  </div>
+  <div class="fg">
+    <label class="fl">장르</label>
+    <select id="new-proj-genre">
+      <option>소설 — 문학</option><option>소설 — 장르</option>
+      <option>에세이</option><option>자기계발</option>
+      <option>시집</option><option>인문/교양</option><option>경제/경영</option>
+    </select>
+  </div>
+  <div class="modal-btns">
+    <button class="btn btn-sec" onclick="closeModal()">취소</button>
+    <button class="btn btn-p" onclick="createProject()"><i class="ti ti-plus"></i>만들기</button>
+  </div>
+</div>
+
+<!-- 토스트 -->
+<div class="toast" id="toast"></div>
+
+<!-- 실시간 진행률 사이드바 -->
+<button class="progress-toggle-btn" id="progress-toggle" onclick="toggleProgressSidebar()">
+  <i class="ti ti-activity"></i>
+  <span class="progress-badge" id="progress-badge" style="display:none">0</span>
+</button>
+
+<div class="progress-sidebar" id="progress-sidebar">
+  <div class="progress-sidebar-header">
+    <div class="progress-sidebar-title">
+      <i class="ti ti-activity"></i>
+      실시간 진행률
+    </div>
+    <button class="progress-sidebar-close" onclick="toggleProgressSidebar()">
+      <i class="ti ti-x"></i>
+    </button>
+  </div>
+  <div class="progress-sidebar-body" id="progress-sidebar-body">
+    <div class="progress-sidebar-empty">
+      <i class="ti ti-clock"></i>
+      <div class="progress-sidebar-empty-text">진행 중인 작업이 없습니다</div>
+    </div>
+  </div>
+</div>
+
+<!-- 모달 오버레이 & 새 프로젝트 모달 -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal()"></div>
+<div class="modal" id="modal-new-project">
+  <div class="modal-title">새 프로젝트</div>
+  <div class="fg" style="margin-top:14px">
+    <label class="fl">책 제목 / 원고명</label>
+    <input type="text" id="new-proj-title" placeholder="예: 항구의 밤" onkeydown="if(event.key==='Enter'){event.preventDefault();createProject();}">
+  </div>
+  <div class="fg">
+    <label class="fl">장르</label>
+    <select id="new-proj-genre">
+      <option value="fiction">소설 — 문학</option>
+      <option value="genre-fiction">소설 — 장르</option>
+      <option value="essay">에세이</option>
+      <option value="selfhelp">자기계발</option>
+      <option value="poetry">시집</option>
+      <option value="humanities">인문/교양</option>
+      <option value="business">경제/경영</option>
+    </select>
+  </div>
+  <div class="modal-btns">
+    <button class="btn btn-sec" onclick="closeModal()">취소</button>
+    <button class="btn btn-p" onclick="createProject()"><i class="ti ti-plus"></i>만들기</button>
+  </div>
+</div>
+
+<!-- 토스트 -->
+<div class="toast" id="toast"></div>
+
+<script src="js/progress-sidebar.js"></script>
+<script src="js/diff-viewer.js"></script>
+<script src="js/diff-integration.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

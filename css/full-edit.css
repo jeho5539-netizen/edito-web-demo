@@ -1,0 +1,161 @@
+/* ═══════════════════════════════════════════════════════════
+   통합 편집 전용 스타일
+   ═══════════════════════════════════════════════════════════ */
+
+/* 3단 비교 뷰 */
+.three-way-comparison {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.compare-column {
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  overflow: hidden;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+}
+
+.compare-header {
+  padding: 10px 14px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.compare-header h4 {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.badge {
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 3px;
+  background: var(--bg4);
+  color: var(--text3);
+}
+
+.badge-correction {
+  background: rgba(100, 100, 100, 0.1);
+  color: var(--c10);
+  border: 1px solid var(--border2);
+}
+
+.badge-proofread {
+  background: rgba(60, 60, 60, 0.1);
+  color: var(--c12);
+  border: 1px solid var(--border3);
+  font-weight: 500;
+}
+
+.compare-content {
+  flex: 1;
+  padding: 14px;
+  font-size: 13px;
+  line-height: 2;
+  overflow-y: auto;
+  background: var(--paper);
+  color: var(--paper-text);
+}
+
+/* 변경 부분 하이라이트 */
+.compare-content .highlight-change {
+  background: rgba(200, 200, 200, 0.2);
+  padding: 0 3px;
+  border-radius: 2px;
+  border-bottom: 1px solid var(--c08);
+}
+
+.comparison-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border2);
+}
+
+/* 장르 칩 (통합 편집용) */
+.genre-chip-full {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  font-size: 11px;
+  border: 1px solid var(--border2);
+  border-radius: 3px;
+  background: var(--bg3);
+  color: var(--text2);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.genre-chip-full:hover {
+  background: var(--bg4);
+  border-color: var(--border3);
+}
+
+.genre-chip-full.on {
+  background: var(--c04);
+  border-color: var(--c06);
+  color: var(--c00);
+  font-weight: 500;
+}
+
+/* 진행률 바 */
+.progress-bar {
+  position: relative;
+  flex: 1;
+  height: 32px;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0%;
+  background: linear-gradient(90deg, var(--c06), var(--c08));
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  text-align: center;
+  font-size: 11px;
+  color: var(--text);
+  font-weight: 500;
+  z-index: 1;
+}
+
+/* 통합 편집 전용 Primary 버튼 */
+.nav-item-primary {
+  background: var(--c04);
+  color: var(--c00);
+  font-weight: 500;
+  border: 1px solid var(--c06);
+}
+
+.nav-item-primary:hover {
+  background: var(--c05);
+  border-color: var(--c07);
+}
+
+.nav-item-primary.active {
+  background: var(--c06);
+}
